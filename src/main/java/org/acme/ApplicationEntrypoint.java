@@ -23,6 +23,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @QuarkusMain
 public class ApplicationEntrypoint implements QuarkusApplication {
@@ -55,24 +56,37 @@ public class ApplicationEntrypoint implements QuarkusApplication {
             Log.info("Node started: " + config.nodeId());
 
             try (ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor()) {
+                final AtomicBoolean taskRunning = new AtomicBoolean(false);
                 scheduler.scheduleAtFixedRate(() -> {
                     try {
                         RaftServer.Division division = server.getDivision(groupId);
                         RaftProtos.RaftPeerRole role = division.getInfo().getCurrentRole();
 
                         if (role == RaftProtos.RaftPeerRole.LEADER) {
-                            Log.info("I am the leader - Start Debezium task now if not started yet !");
+                            if (taskRunning.compareAndSet(false, true)) {
+                                startDebeziumTask();
+                            }
                         } else {
-                            Log.info("I am not the leader");
+                            if (taskRunning.compareAndSet(true, false)) {
+                                stopDebeziumTask();
+                            }
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                }, 0, 10, TimeUnit.SECONDS);
+                }, 0, 500, TimeUnit.MILLISECONDS);
                 Thread.currentThread().join();
             }
         }
         return 0;
+    }
+
+    private void startDebeziumTask() {
+        Log.info("Node is LEADER. Starting Debezium task...");
+    }
+
+    private void stopDebeziumTask() {
+        Log.info("Node is no longer LEADER. Stopping Debezium task... Can overlap !");
     }
 
     public List<RaftPeer> buildPeers() {
