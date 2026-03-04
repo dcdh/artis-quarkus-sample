@@ -16,6 +16,7 @@
         <quarkus.platform.version>3.32.1</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
+        <ratis.version>3.2.1</ratis.version>
     </properties>
 
     <dependencyManagement>
@@ -36,8 +37,19 @@
             <artifactId>quarkus-arc</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest</artifactId>
+            <groupId>org.apache.ratis</groupId>
+            <artifactId>ratis-server</artifactId>
+            <version>${ratis.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ratis</groupId>
+            <artifactId>ratis-grpc</artifactId>
+            <version>${ratis.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ratis</groupId>
+            <artifactId>ratis-metrics-default</artifactId>
+            <version>${ratis.version}</version>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
