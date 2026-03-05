@@ -74,7 +74,7 @@ public class ApplicationEntrypoint implements QuarkusApplication {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                }, 0, 500, TimeUnit.MILLISECONDS);
+                }, 0, 10, TimeUnit.MILLISECONDS);
                 Thread.currentThread().join();
             }
         }
